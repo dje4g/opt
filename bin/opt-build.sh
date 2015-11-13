@@ -194,6 +194,8 @@ prepare_build_dir() {
 # It's the same as --host.
 # An alternative to CFLAGS is to use install-strip, but not every package has
 # install-strip, and we generally don't need debug info.
+# CFLAGS is set for configure and make because some packages handle one or
+# the other.
 
 run_configure() {
     if [ "$rqst_configure" = yes ]
@@ -280,7 +282,9 @@ run_make() {
 	else
 	    cd $OPTPKG_BUILDDIR
 	fi
-	make -j$OPT_PARALLELISM "$@"
+	make -j$OPT_PARALLELISM \
+	     CFLAGS=-O2 CXXFLAGS=-O2 \
+	     "$@"
 	set +x
     fi
 }

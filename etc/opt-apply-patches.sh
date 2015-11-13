@@ -3,7 +3,7 @@
 
 set -eu
 
-source $OPT_ROOT/etc/opt-config.sh
+source $OPT_ROOT/etc/opt/opt-config.sh
 
 usage() {
     echo "Usage: opt-apply-patches.sh <patch-spec-file> <src-dir>"

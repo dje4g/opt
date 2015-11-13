@@ -51,16 +51,16 @@ distclean:
 
 install:
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(bindir)
-	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sysconfdir)
+	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sysconfdir)/opt
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(localstatedir)/opt
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(docdir)
 	for f in $(BINFILES) ; \
 	do \
-	  $(INSTALL) -m 0755 $(srcdir)/bin/$$f $(DESTDIR)$(bindir)/$$f ; \
+	  $(INSTALL) -m 0755 $(srcdir)/bin/$${f}.sh $(DESTDIR)$(bindir)/$$f ; \
 	done
 	for f in $(ETCFILES) ; \
 	do \
-	  $(INSTALL) -m 0644 $(srcdir)/etc/$$f $(DESTDIR)$(sysconfdir)/$$f; \
+	  $(INSTALL) -m 0644 $(srcdir)/etc/$$f $(DESTDIR)$(sysconfdir)/opt/$$f; \
 	done
 	for f in $(VARFILES) ; \
 	do \

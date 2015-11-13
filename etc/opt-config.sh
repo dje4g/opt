@@ -22,6 +22,9 @@ then
     fi
 fi
 
+# The etc dir.
+declare -r OPT_ETC_DIR=$OPT_ROOT/etc/opt
+
 # The main working directory.
 declare -r OPT_STAGE_DIR=$OPT_ROOT/staging
 
@@ -47,6 +50,7 @@ declare -r OPT_DB_DIR=$OPT_ROOT/var/opt
 # The build/host/target triplets.
 # For non-crosstools host == target.
 # For crosstools host == build, target != host.
+# TODO: Obviously needs to be configurable.
 declare -r OPT_BUILD_SYSTEM=x86_64-fuchsiabuild-linux-musl
 declare -r OPT_HOST_SYSTEM=x86_64-fuchsia-linux-musl
 

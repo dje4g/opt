@@ -7,7 +7,7 @@ case "$0" in
 /*) declare -r OPT_ROOT=$(dirname $(dirname $0)) ;;
 *) declare -r OPT_ROOT=$(dirname $(dirname $(pwd)/$0)) ;;
 esac
-source $OPT_ROOT/etc/opt-config.sh
+source $OPT_ROOT/etc/opt/opt-config.sh
 
 usage() {
     echo "Usage: opt-uninstall <pkg-name>"

@@ -7,7 +7,7 @@ case "$0" in
 /*) declare -r OPT_ROOT=$(dirname $(dirname $0)) ;;
 *) declare -r OPT_ROOT=$(dirname $(dirname $(pwd)/$0)) ;;
 esac
-source $OPT_ROOT/etc/opt-config.sh
+source $OPT_ROOT/etc/opt/opt-config.sh
 
 usage() {
     echo "Usage: opt-build <mode> <spec-file>"
@@ -176,7 +176,7 @@ prepare_package() {
 	tar -C $OPTPKG_SRCDIR -xf $OPT_SRC_DIR/$PKG_TARBALL
 	if [ "$PKG_PATCHES" != "none" ]
 	then
-	    /bin/sh $OPT_ROOT/etc/opt-apply-patches.sh $OPT_PATCHES_DIR/$PKG_PATCHES $OPTPKG_SRCDIR/$PKG_SRC
+	    /bin/sh $OPT_ROOT/etc/opt/opt-apply-patches.sh $OPT_PATCHES_DIR/$PKG_PATCHES $OPTPKG_SRCDIR/$PKG_SRC
 	fi
 	set +x
     fi

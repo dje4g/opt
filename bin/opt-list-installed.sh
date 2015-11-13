@@ -1,5 +1,5 @@
 #! /bin/sh
-# List all available packages installed in $OPT_ROOT/packages.
+# List all installed packages.
 
 set -eu
 
@@ -7,10 +7,10 @@ case "$0" in
 /*) declare -r OPT_ROOT=$(dirname $(dirname $0)) ;;
 *) declare -r OPT_ROOT=$(dirname $(dirname $(pwd)/$0)) ;;
 esac
-source $OPT_ROOT/etc/opt-config.sh
+source $OPT_ROOT/etc/opt/opt-config.sh
 
 usage() {
-    echo "Usage: opt-list-available"
+    echo "Usage: opt-list-installed"
 }
 
 if [ $# -eq 0 -a "$1" == --help ]
@@ -25,4 +25,5 @@ then
     exit 1
 fi
 
-/bin/ls -1 $OPT_PKG_DIR/*.pkg 2>/dev/null | sed -e 's/[.]pkg$//'
+cd $OPT_DB_DIR
+/bin/ls -1 *.contents 2>/dev/null | sed -e 's/[.]contents$//'

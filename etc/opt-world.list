@@ -1,0 +1,102 @@
+# List of all packages, in the order they must be built.
+# [The order doesn't matter as much any more, but to for potential
+# bootstrapping needs we maintain this order.]
+
+# The first set is to get gcc going.
+
+#binutils-2.24
+gmp-6.0.0a
+mpfr-3.1.2
+mpc-1.0.2
+gcc-4.9.3
+
+# This is a pseudo-package that provides CC_FOR_BUILD when building
+# natively.
+native-tools-0.1
+
+# We could switch over to the new gcc at this point if building natively,
+# but for simplicity we stick with the current gcc.
+
+# These tools are needed to do builds.
+
+missing-libc-0.1
+readline-6.3
+gzip-1.6
+pkg-config-0.28
+bzip2-1.0.6
+xz-5.2.2
+make-3.82
+m4-1.4.17
+sed-4.2.2
+gawk-4.0.2
+perl-5.22.0
+autoconf-2.64
+autoconf-2.69
+automake-1.11.1
+automake-1.14.1
+libtool-2.4.6
+texinfo-5.2
+
+# Other libaries and packages that are frequently dependencies of
+# other packages.
+
+libffi-3.2.1
+glib-2.46.0
+re2c-0.14.3
+tar-1.28
+file-5.25
+diffutils-3.3
+findutils-4.5.14
+flex-2.5.39
+bison-3.0.2
+db.1.85
+python-2.7.10
+python-3.5.0
+go-1.4.3
+
+# Random collection of packages.
+
+gdb-7.10
+bc-1.06
+less-451
+vim-7.4
+emacs-git
+strace-4.10
+tcl-8.5.18
+expect-5.45
+dejagnu-1.5.3
+curl-7.45.0
+e2fsprogs-1.42.13
+gettext-0.19.6
+git-2.6.1
+grub-2.02~beta2
+iproute2-4.2.0
+lsof-4.89
+lynx-2.8.7
+parted-3.2
+patch-2.7.5
+sudo-1.8.14
+  
+# LLVM isn't built yet.
+
+# llvm
+# cfe
+# compiler-rt
+# libcxx
+# libcxxabi
+# lld
+# lldb
+# libunwind
+
+# for later
+
+# certdata !!!
+# elfutils [needs libargp]
+# kbd [needs check]
+# setuptools, see /sam/tqdata/home/tq/NOTES
+# mako
+
+# These are already installed in root image.
+
+# bash
+# ssl

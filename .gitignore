@@ -5,3 +5,6 @@
 *.patch
 *.rej
 *.orig
+
+# autoconf
+autom4te.cache

@@ -21,14 +21,21 @@ then
     exit 1
 fi
 
-opt_file="$1"
-
-case "$opt_file" in
-    *.pkg) ;;
+case "$1" in
     --help)
 	usage
 	exit 0
 	;;
+    --version)
+	opt_print_version
+	exit 0
+	;;
+esac
+
+opt_file="$1"
+
+case "$opt_file" in
+    *.pkg) ;;
     *)
 	echo "Not an opt package: $opt_file" >&2
 	exit 1

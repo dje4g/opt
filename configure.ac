@@ -1,4 +1,4 @@
-# Install symlinks to access various native tools.
+# The "opt" repo system ("opt" is for OPTional).
 
 AC_PREREQ(2.64)
 

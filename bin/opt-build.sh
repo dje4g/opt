@@ -27,10 +27,18 @@ usage() {
     echo "  from-source"
 }
 
-if [ $# -eq 1 -a "$1" == help ]
+if [ $# -eq 1 ]
 then
-    usage
-    exit 0
+    case "$1" in
+	--help)
+	    usage
+	    exit 0
+	    ;;
+	--version)
+	    opt_print_version
+	    exit 0
+	    ;;
+    esac
 fi
 
 if [ $# -ne 2 ]

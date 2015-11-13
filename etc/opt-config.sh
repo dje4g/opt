@@ -62,3 +62,7 @@ declare -r OPT_NATIVE_SYSTEM=$MACHTYPE
 
 # The -j arg to make.
 declare -r OPT_PARALLELISM=8
+
+opt_print_version() {
+    echo "OPT version $OPT_VERSION."
+}

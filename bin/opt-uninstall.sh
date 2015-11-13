@@ -20,11 +20,16 @@ then
     exit 1
 fi
 
-if [ "$1" == --help ]
-then
-    usage
-    exit 0
-fi
+case "$1" in
+    --help)
+	usage
+	exit 0
+	;;
+    --version)
+	opt_print_version
+	exit 0
+	;;
+esac
 
 pkg_name="$1"
 

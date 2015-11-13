@@ -1,5 +1,5 @@
 #! /bin/sh
-# List all available packages installed in $OPT_ROOT/packages.
+# List all available packages contained in $OPT_ROOT/packages.
 
 set -eu
 
@@ -13,10 +13,18 @@ usage() {
     echo "Usage: opt-list-available"
 }
 
-if [ $# -eq 0 -a "$1" == --help ]
+if [ $# -eq 1 ]
 then
-    usage
-    exit 0
+    case "$1" in
+	--help)
+	    usage
+	    exit 0
+	    ;;
+	--version)
+	    opt_print_version
+	    exit 0
+	    ;;
+    esac
 fi
 
 if [ $# -ne 0 ]

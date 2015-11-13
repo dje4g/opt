@@ -17,6 +17,9 @@ native-tools-0.1
 # We could switch over to the new gcc at this point if building natively,
 # but for simplicity we stick with the current gcc.
 
+# Libraries that are dependencies of subsequent tools needed for builds.
+db.1.85
+
 # These tools are needed to do builds.
 
 missing-libc-0.1
@@ -50,7 +53,6 @@ diffutils-3.3
 findutils-4.5.14
 flex-2.5.39
 bison-3.0.2
-db.1.85
 gdbm-1.11
 python-2.7.10
 python-3.5.0

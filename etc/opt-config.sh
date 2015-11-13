@@ -1,6 +1,6 @@
 # Define various environment variables that configure "opt".
 
-OPT_VERSION="0.2"
+OPT_VERSION="0.2.90"
 
 # The root of the opt tree.
 # OPT_ROOT is either auto-determined or set by the user, and then compared
@@ -53,6 +53,12 @@ declare -r OPT_DB_DIR=$OPT_ROOT/var/opt
 # TODO: Obviously needs to be configurable.
 declare -r OPT_BUILD_SYSTEM=x86_64-fuchsiabuild-linux-musl
 declare -r OPT_HOST_SYSTEM=x86_64-fuchsia-linux-musl
+
+# This is for native builds.
+# We'd like to use OPT_BUILD_SYSTEM, but that's taken for self-hosted
+# cross builds.
+# MACHTYPE is provided by bash.
+declare -r OPT_NATIVE_SYSTEM=$MACHTYPE
 
 # The -j arg to make.
 declare -r OPT_PARALLELISM=8

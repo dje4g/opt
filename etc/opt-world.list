@@ -1,10 +1,10 @@
 # List of all packages, in the order they must be built.
-# [The order doesn't matter as much any more, but to for potential
+# [The order doesn't matter as much any more, but for potential
 # bootstrapping needs we maintain this order.]
 
 # The first set is to get gcc going.
 
-#binutils-2.24
+binutils-2.24
 gmp-6.0.0a
 mpfr-3.1.2
 mpc-1.0.2
@@ -41,6 +41,7 @@ texinfo-5.2
 # other packages.
 
 libffi-3.2.1
+libpipeline-1.4.1
 glib-2.46.0
 re2c-0.14.3
 tar-1.28
@@ -50,6 +51,7 @@ findutils-4.5.14
 flex-2.5.39
 bison-3.0.2
 db.1.85
+gdbm-1.11
 python-2.7.10
 python-3.5.0
 go-1.4.3
@@ -76,6 +78,9 @@ lynx-2.8.7
 parted-3.2
 patch-2.7.5
 sudo-1.8.14
+ssmtp-2.64
+groff-1.22.3
+man-db-2.7.2
   
 # LLVM isn't built yet.
 

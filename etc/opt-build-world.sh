@@ -2,7 +2,7 @@
 # Utility script to build the entire world.
 
 set -eu
-source $OPT_ROOT/etc/opt-config.sh
+source $OPT_ROOT/etc/opt/opt-config.sh
 
 IFS="
 "
@@ -25,7 +25,7 @@ do
 	    fi
 	    ;;
     esac
-done < $OPT_ROOT/etc/opt-world.list
+done < $OPT_ETC_DIR/opt-world.list
 
 # On with the show.
 
@@ -43,4 +43,4 @@ do
 	    opt-build from-scratch $OPT_SPECS_DIR/${pkg_name}.spec
 	    ;;
     esac
-done < $OPT_ROOT/etc/opt-world.list
+done < $OPT_ETC_DIR/opt-world.list

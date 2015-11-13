@@ -1,5 +1,7 @@
 #! /bin/sh
 # Main script for building packages.
+#
+# Functions beginning with pkg_ are for packages to redefine if needed.
 
 set -eu
 
@@ -142,9 +144,14 @@ analyze_spec() {
     then
 	declare -g -r PKG_BUILD_IN_SRC=no
     fi
+    if [ -z "$PKG_NATIVE_ONLY" ]
+    then
+	declare -g -r PKG_NATIVE_ONLY=no
+    fi
     set -u
     : "Patches $PKG_PATCHES ..."
     : "Patches $PKG_BUILD_IN_SRC ..."
+    : "Patches $PKG_NATIVE_ONLY ..."
 
     # Export these for programs like opt-apply-patches.
     export PKG_NAME
@@ -152,6 +159,7 @@ analyze_spec() {
     export PKG_SRC
     export PKG_PATCHES
     export PKG_BUILD_IN_SRC
+    export PKG_NATIVE_ONLY
 
     # Exported utility variables, to simplify the text.
     declare -g -r OPTPKG_SRCDIR=$OPT_STAGE_DIR/src/$PKG_NAME
@@ -192,10 +200,51 @@ prepare_build_dir() {
 # gmp complains if --target is specified.
 # See if we can get away with not specifying target at all.
 # It's the same as --host.
+#
 # An alternative to CFLAGS is to use install-strip, but not every package has
 # install-strip, and we generally don't need debug info.
 # CFLAGS is set for configure and make because some packages handle one or
 # the other.
+
+std_cross_configure() {
+    $OPTPKG_SRCDIR/$PKG_SRC/configure \
+	--build=$OPT_BUILD_SYSTEM \
+	--host=$OPT_HOST_SYSTEM \
+	--prefix=$OPT_ROOT \
+	$OPTPKG_BUILD_SYSROOT_OPTION \
+	--disable-nls \
+	--enable-shared \
+	CFLAGS=-O2 CXXFLAGS=-O2 \
+	"$@"
+}
+
+# Bleah, some packages use AC_TRY_RUN, and thus require a native build.
+# The use of OPT_NATIVE_SYSTEM instead of OPT_BUILD_SYSTEM is a quirk of
+# our self-hosted cross builds.
+
+std_native_configure() {
+    $OPTPKG_SRCDIR/$PKG_SRC/configure \
+	--build=$OPT_NATIVE_SYSTEM \
+	--host=$OPT_NATIVE_SYSTEM \
+	--prefix=$OPT_ROOT \
+	--disable-nls \
+	--enable-shared \
+	CFLAGS=-O2 CXXFLAGS=-O2 \
+	"$@"
+}
+
+std_configure() {
+    if [ "$PKG_NATIVE_ONLY" = yes ]
+    then
+	std_native_configure "$@"
+    else
+	std_cross_configure "$@"
+    fi
+}
+
+pkg_configure() {
+    std_configure
+}
 
 run_configure() {
     if [ "$rqst_configure" = yes ]
@@ -208,68 +257,19 @@ run_configure() {
 	    prepare_build_dir
 	    cd $OPTPKG_BUILDDIR
 	fi
-	$OPTPKG_SRCDIR/$PKG_SRC/configure \
-	    --build=$OPT_BUILD_SYSTEM \
-	    --host=$OPT_HOST_SYSTEM \
-	    --prefix=$OPT_ROOT \
-	    $OPTPKG_BUILD_SYSROOT_OPTION \
-	    --disable-nls \
-	    --enable-shared \
-	    "$@"
+	pkg_configure
 	set +x
     fi
 }
 
-run_crosstool_configure() {
-    if [ "$rqst_configure" = yes ]
-    then
-	set -x
-	if [ "$PKG_BUILD_IN_SRC" = yes ]
-	then
-	    cd $OPTPKG_SRCDIR/$PKG_SRC
-	else
-	    prepare_build_dir
-	    cd $OPTPKG_BUILDDIR
-	fi
-	# TODO(dje): A sysroot of /. is perhaps a wart, but
-	# I don't mind it.
-	$OPTPKG_SRCDIR/$PKG_SRC/configure \
-	    --build=$OPT_BUILD_SYSTEM \
-	    --host=$OPT_BUILD_SYSTEM \
-	    --target=$OPT_HOST_SYSTEM \
-	    --prefix=$OPT_ROOT \
-	    --with-sysroot=/. \
-	    --disable-nls \
-	    --enable-shared \
-	    CFLAGS=-O2 CXXFLAGS=-O2 \
-	    "$@"
-	set +x
-    fi
+std_make() {
+    make -j$OPT_PARALLELISM \
+	 CFLAGS=-O2 CXXFLAGS=-O2 \
+	 "$@"
 }
 
-# Bleah, some packages use AC_TRY_RUN, and thus require a native build.
-
-run_native_configure() {
-    if [ "$rqst_configure" = yes ]
-    then
-	set -x
-	if [ "$PKG_BUILD_IN_SRC" = yes ]
-	then
-	    cd $OPTPKG_SRCDIR/$PKG_SRC
-	else
-	    prepare_build_dir
-	    cd $OPTPKG_BUILDDIR
-	fi
-	$OPTPKG_SRCDIR/$PKG_SRC/configure \
-	    --build=$OPT_HOST_SYSTEM \
-	    --host=$OPT_HOST_SYSTEM \
-	    --prefix=$OPT_ROOT \
-	    --disable-nls \
-	    --enable-shared \
-	    CFLAGS=-O2 CXXFLAGS=-O2 \
-	    "$@"
-	set +x
-    fi
+pkg_make() {
+    std_make
 }
 
 run_make() {
@@ -282,9 +282,7 @@ run_make() {
 	else
 	    cd $OPTPKG_BUILDDIR
 	fi
-	make -j$OPT_PARALLELISM \
-	     CFLAGS=-O2 CXXFLAGS=-O2 \
-	     "$@"
+	pkg_make
 	set +x
     fi
 }
@@ -292,6 +290,14 @@ run_make() {
 build_contents_file() {
     mkdir -m 0755 -p "${OPTPKG_DESTDIR}${OPT_DB_DIR}"
     (cd ${OPTPKG_DESTDIR}${OPT_ROOT} && find . -print) > ${OPTPKG_DESTDIR}${OPT_DB_DIR}/${PKG_NAME}.contents
+}
+
+std_stage() {
+    make install "$@"
+}
+
+pkg_stage() {
+    std_stage "$@"
 }
 
 run_stage() {
@@ -305,7 +311,10 @@ run_stage() {
 	    cd $OPTPKG_BUILDDIR
 	fi
 	rm -rf $OPTPKG_DESTDIR
-	make install "$@" DESTDIR=$OPTPKG_DESTDIR
+	# Pass DESTDIR as both an env var and make var for convenience.
+	export DESTDIR=$OPTPKG_DESTDIR
+	pkg_stage DESTDIR=$OPTPKG_DESTDIR
+	unset DESTDIR
 	build_contents_file
 	set +x
     fi
@@ -321,7 +330,10 @@ run_stage() {
 	else
 	    cd $OPTPKG_BUILDDIR
 	fi
-	make install "$@" DESTDIR=$OPT_SYSROOT_DIR
+	# Pass DESTDIR as both an env var and make var for convenience.
+	export DESTDIR=$OPT_SYSROOT_DIR
+	pkg_stage DESTDIR=$OPT_SYSROOT_DIR
+	unset DESTDIR
 	set +x
     fi
 }
@@ -350,44 +362,11 @@ finish_package() {
     fi
 }
 
-# Wrapper scripts for the common cases.
-
 std_package() {
     # After sourcing opt-build.sh, all non-std scripts begin with this.
     prepare_package
 
-    # An alternative to CFLAGS is to use install-strip, but not every package
-    # has install-strip, and we generally don't need debug info.
-    run_configure \
-	CFLAGS=-O2 CXXFLAGS=-O2 "$@"
-    run_make
-    run_stage
-
-    # And end with this.
-    finish_package
-}
-
-std_crosstool_package() {
-    # After sourcing opt-build.sh, all non-std scripts begin with this.
-    prepare_package
-
-    run_crosstool_configure \
-	CFLAGS=-O2 CXXFLAGS=-O2 "$@"
-    run_make
-    run_stage
-
-    # And end with this.
-    finish_package
-}
-
-std_native_package() {
-    # After sourcing opt-build.sh, all non-std scripts begin with this.
-    prepare_package
-
-    # An alternative to CFLAGS is to use install-strip, but not every package
-    # has install-strip, and we generally don't need debug info.
-    run_native_configure \
-	CFLAGS=-O2 CXXFLAGS=-O2 "$@"
+    run_configure
     run_make
     run_stage
 
@@ -398,3 +377,5 @@ std_native_package() {
 # Load the spec file and process the request.
 
 source "$OPTPKG_SPECFILE"
+
+std_package

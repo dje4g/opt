@@ -173,9 +173,11 @@ analyze_spec() {
     declare -g -r OPTPKG_SRCDIR=$OPT_STAGE_DIR/src/$PKG_NAME
     declare -g -r OPTPKG_BUILDDIR=$OPT_STAGE_DIR/build/$PKG_NAME
     declare -g -r OPTPKG_DESTDIR=$OPT_STAGE_DIR/destdir/$PKG_NAME
+    declare -g -r OPTSTAGE_PKGDIR=$OPT_STAGE_DIR/packages
     export OPTPKG_SRCDIR
     export OPTPKG_BUILDDIR
     export OPTPKG_DESTDIR
+    export OPTSTAGE_PKGDIR
 
     set +x
 }
@@ -350,12 +352,13 @@ finish_package() {
     if [ "$rqst_package" = yes ]
     then
 	set -x
-	cd $OPT_STAGE_DIR/destdir/${PKG_NAME}${OPT_ROOT}
-	rm -f ${OPT_PKG_DIR}/${PKG_NAME}.pkg
+	cd ${OPTPKG_DESTDIR}${OPT_ROOT}
+	mkdir -m 0755 -p $OPTSTAGE_PKGDIR
+	rm -f ${OPTSTAGE_PKGDIR}/${PKG_NAME}.pkg
 	# Prepend a leading unique directory so that trying to install in /
 	# will break. It *could* work, but it doesn't feel safe to allow this
 	# by default. The user can always pass --strip-components=1 to tar.
-	tar --transform="s,^[.]/,opt/," -z -cf ${OPT_PKG_DIR}/${PKG_NAME}.pkg .
+	tar --transform="s,^[.]/,opt/," -z -cf ${OPTSTAGE_PKGDIR}/${PKG_NAME}.pkg .
 	set +x
     fi
 

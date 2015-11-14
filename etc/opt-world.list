@@ -58,31 +58,35 @@ python-2.7.10
 python-3.5.0
 go-1.4.3
 
-# Random collection of packages.
+# Random collection of packages, in no particular order
+# (alphabetical for ease of maintenance).
 
-gdb-7.10
 bc-1.06
-less-451
-vim-7.4
-emacs-git
-strace-4.10
-tcl-8.5.18
-expect-5.45
-dejagnu-1.5.3
 curl-7.45.0
+dejagnu-1.5.3
 e2fsprogs-1.42.13
+emacs-git
+expect-5.45
+gdb-7.10
 gettext-0.19.6
 git-2.6.1
+groff-1.22.3
 grub-2.02~beta2
 iproute2-4.2.0
+less-451
 lsof-4.89
 lynx-2.8.7
+man-db-2.7.2
 parted-3.2
 patch-2.7.5
-sudo-1.8.14
 ssmtp-2.64
-groff-1.22.3
-man-db-2.7.2
+strace-4.10
+sudo-1.8.14
+tcl-8.5.18
+time-1.7
+vim-7.4
+wget-1.16.3
+which-2.21
   
 # LLVM isn't built yet.
 

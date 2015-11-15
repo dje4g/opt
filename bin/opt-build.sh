@@ -12,7 +12,9 @@ esac
 source $OPT_ROOT/etc/opt/opt-config.sh
 
 usage() {
-    echo "Usage: opt-build <mode> <spec-file>"
+    echo "Usage: opt-build [options] <mode> <spec-file>"
+    echo "Options:"
+    echo "  --install"
     echo "Mode is one of:"
     echo "  help"
     # TODO(dje): It might be useful to split up prepare into prepare, extract.
@@ -25,6 +27,11 @@ usage() {
     echo "  clean"
     echo "  from-scratch"
     echo "  from-source"
+}
+
+error() {
+    echo "$@" >&2
+    exit 1
 }
 
 if [ $# -eq 1 ]
@@ -40,6 +47,18 @@ then
 	    ;;
     esac
 fi
+
+do_install=no
+
+done_options=no
+while [ $# -gt 0 -a $done_options = no ]
+do
+    case "$1" in
+	--install) do_install=yes ; shift ;;
+	-*) usage >&2 ; exit 1 ;;
+	*) done_options=yes ;;
+    esac
+done
 
 if [ $# -ne 2 ]
 then
@@ -100,6 +119,15 @@ case "$mode" in
     from-scratch) rqst_prepare=yes ;;
 esac
 
+# Validate any options.
+
+if [ $do_install = yes -a $rqst_package = no ]
+then
+    error "--install requires building the package"
+fi
+
+# Any final setup.
+
 case "$OPT_BUILD_SYSTEM" in
     *-linux-musl)
 	#export PATH="$OPT_SYSROOT_DIR/bin:$PATH"
@@ -134,16 +162,29 @@ case "$OPT_BUILD_SYSTEM" in
 	;;
 esac
 
+# Utility functions.
+
 analyze_spec() {
     set -x
 
     # Part of what this does is make sure these variables are defined.
     : "Package $PKG_NAME ..."
+    : "Version $PKG_VERSION ..."
     : "Tarball $PKG_TARBALL ..."
-    : "Source $PKG_SRC ..."
+    : "URL $PKG_URL ..."
 
-    # These are optional.
+    # These are optional, provide defaults.
     set +u
+    if [ -z "$PKG_SIG" ]
+    then
+	# This works for gnu packages, and there are a lot of them,
+	# so this is as good a default as any.
+	declare -g -r PKG_SIG=${PKG_URL}.sig
+    fi
+    if [ -z "$PKG_SRC" ]
+    then
+	declare -g -r PKG_SRC=${PKG_NAME}-${PKG_VERSION}
+    fi
     if [ -z "$PKG_PATCHES" ]
     then
 	declare -g -r PKG_PATCHES=none
@@ -157,34 +198,37 @@ analyze_spec() {
 	declare -g -r PKG_NATIVE_ONLY=no
     fi
     set -u
+    : "Signature $PKG_SIG ..."
+    : "Source $PKG_SRC ..."
     : "Patches $PKG_PATCHES ..."
-    : "Patches $PKG_BUILD_IN_SRC ..."
-    : "Patches $PKG_NATIVE_ONLY ..."
+    : "Build-in-src $PKG_BUILD_IN_SRC ..."
+    : "Native-only $PKG_NATIVE_ONLY ..."
 
     # Export these for programs like opt-apply-patches.
     export PKG_NAME
+    export PKG_VERSION
     export PKG_TARBALL
+    export PKG_URL
+    export PKG_SIG
     export PKG_SRC
     export PKG_PATCHES
     export PKG_BUILD_IN_SRC
     export PKG_NATIVE_ONLY
 
     # Exported utility variables, to simplify the text.
-    declare -g -r OPTPKG_SRCDIR=$OPT_STAGE_DIR/src/$PKG_NAME
-    declare -g -r OPTPKG_BUILDDIR=$OPT_STAGE_DIR/build/$PKG_NAME
-    declare -g -r OPTPKG_DESTDIR=$OPT_STAGE_DIR/destdir/$PKG_NAME
-    declare -g -r OPTSTAGE_PKGDIR=$OPT_STAGE_DIR/packages
+    declare -g -r OPTPKG_FULLNAME=${PKG_NAME}-${PKG_VERSION}
+    declare -g -r OPTPKG_SRCDIR=$OPT_STAGE_DIR/src/$OPTPKG_FULLNAME
+    declare -g -r OPTPKG_BUILDDIR=$OPT_STAGE_DIR/build/$OPTPKG_FULLNAME
+    declare -g -r OPTPKG_DESTDIR=$OPT_STAGE_DIR/destdir/$OPTPKG_FULLNAME
+    export OPTPKG_FULLNAME
     export OPTPKG_SRCDIR
     export OPTPKG_BUILDDIR
     export OPTPKG_DESTDIR
-    export OPTSTAGE_PKGDIR
 
     set +x
 }
 
 prepare_package() {
-    analyze_spec
-
     if [ "$rqst_prepare" = yes ]
     then
 	set -x
@@ -299,7 +343,7 @@ run_make() {
 
 build_contents_file() {
     mkdir -m 0755 -p "${OPTPKG_DESTDIR}${OPT_DB_DIR}"
-    (cd ${OPTPKG_DESTDIR}${OPT_ROOT} && find . -print) > ${OPTPKG_DESTDIR}${OPT_DB_DIR}/${PKG_NAME}.contents
+    (cd ${OPTPKG_DESTDIR}${OPT_ROOT} && find . -print) > ${OPTPKG_DESTDIR}${OPT_DB_DIR}/${OPTPKG_FULLNAME}.contents
 }
 
 std_stage() {
@@ -353,12 +397,17 @@ finish_package() {
     then
 	set -x
 	cd ${OPTPKG_DESTDIR}${OPT_ROOT}
-	mkdir -m 0755 -p $OPTSTAGE_PKGDIR
-	rm -f ${OPTSTAGE_PKGDIR}/${PKG_NAME}.pkg
+	mkdir -m 0755 -p $OPTSTAGE_PKG_DIR
+	pkg_file=${OPTSTAGE_PKG_DIR}/${OPTPKG_FULLNAME}.pkg
+	rm -f $pkg_file
 	# Prepend a leading unique directory so that trying to install in /
 	# will break. It *could* work, but it doesn't feel safe to allow this
 	# by default. The user can always pass --strip-components=1 to tar.
-	tar --transform="s,^[.]/,opt/," -z -cf ${OPTSTAGE_PKGDIR}/${PKG_NAME}.pkg .
+	tar --transform="s,^[.]/,opt/," -z -cf $pkg_file .
+	if [ $do_install = yes ]
+	then
+	    opt-install $pkg_file
+	fi
 	set +x
     fi
 
@@ -388,5 +437,14 @@ std_package() {
 # Load the spec file and process the request.
 
 source "$OPTPKG_SPECFILE"
+analyze_spec
+
+echo "Beginning build of $OPTPKG_FULLNAME ..."
+
+start_time=$(date '+%s')
 
 std_package
+
+end_time=$(date '+%s')
+
+echo "Build of $OPTPKG_FULLNAME completed in $(expr $end_time - $start_time) seconds."

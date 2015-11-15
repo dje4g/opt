@@ -28,6 +28,9 @@ declare -r OPT_ETC_DIR=$OPT_ROOT/etc/opt
 # The main working directory.
 declare -r OPT_STAGE_DIR=$OPT_ROOT/staging
 
+# Where packages get put by opt-build.
+declare -r OPTSTAGE_PKG_DIR=$OPT_STAGE_DIR/packages
+
 # sysroot in the staging area.
 declare -r OPT_SYSROOT_DIR=$OPT_STAGE_DIR/sysroot
 declare -r OPT_SYSROOT_ROOT=${OPT_SYSROOT_DIR}${OPT_ROOT}
@@ -62,6 +65,9 @@ declare -r OPT_NATIVE_SYSTEM=$MACHTYPE
 
 # The -j arg to make.
 declare -r OPT_PARALLELISM=8
+
+# The main gnu ftp directory.
+declare -r OPT_URL_GNU=ftp://ftp.gnu.org/gnu
 
 opt_print_version() {
     echo "OPT version $OPT_VERSION."

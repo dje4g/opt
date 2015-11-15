@@ -19,47 +19,55 @@ native-tools-0.1
 
 # Libraries that are dependencies of subsequent tools needed for builds.
 db.1.85
-
-# These tools are needed to do builds.
-
 missing-libc-0.1
 readline-6.3
 gzip-1.6
-pkg-config-0.28
 bzip2-1.0.6
 xz-5.2.2
-make-3.82
-m4-1.4.17
-sed-4.2.2
-gawk-4.0.2
-perl-5.22.0
+
+# Basic tools to do builds in no particular order
+# (alphabetical for ease of maintenance).
+
 autoconf-2.64
 autoconf-2.69
 automake-1.11.1
 automake-1.14.1
+gawk-4.0.2
 libtool-2.4.6
+m4-1.4.17
+make-3.82
+perl-5.22.0
+pkg-config-0.28
+sed-4.2.2
 texinfo-5.2
 
-# Other libaries and packages that are frequently dependencies of
-# other packages.
+# Other libraries and packages that are frequently dependencies of
+# other packages or are needed to build other packages.
+# In no particular order (alphabetical for ease of maintenance).
 
-libffi-3.2.1
-libpipeline-1.4.1
-glib-2.46.0
-re2c-0.14.3
-tar-1.28
-file-5.25
+bison-3.0.2
 diffutils-3.3
+file-5.25
 findutils-4.5.14
 flex-2.5.39
-bison-3.0.2
+gc-7.4.2
 gdbm-1.11
+glib-2.46.0
+go-1.4.3
+libatomic_ops-7.4.2
+libffi-3.2.1
+libpipeline-1.4.1
+libxml2-2.9.2
 python-2.7.10
 python-3.5.0
-go-1.4.3
+re2c-0.14.3
+tar-1.28
 
 # Random collection of packages, in no particular order
 # (alphabetical for ease of maintenance).
+
+# Alas tcl must be built before expect, expect reaches into tcl sources. :-(
+tcl-8.5.18
 
 bc-1.06
 curl-7.45.0
@@ -82,9 +90,9 @@ patch-2.7.5
 ssmtp-2.64
 strace-4.10
 sudo-1.8.14
-tcl-8.5.18
 time-1.7
 vim-7.4
+w3m-0.5.3
 wget-1.16.3
 which-2.21
   

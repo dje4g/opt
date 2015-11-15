@@ -31,6 +31,8 @@ done < $OPT_ETC_DIR/opt-world.list
 
 set -x
 
+date
+
 while read line
 do
     case "$line" in
@@ -40,7 +42,11 @@ do
 	    ;;
 	*)
 	    pkg_name="$line"
-	    opt-build from-scratch $OPT_SPECS_DIR/${pkg_name}.spec
+	    # The next package may need this one, so tell opt-build to
+	    # install it.
+	    opt-build --install from-scratch $OPT_SPECS_DIR/${pkg_name}.spec
 	    ;;
     esac
 done < $OPT_ETC_DIR/opt-world.list
+
+date

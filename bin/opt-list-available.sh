@@ -33,4 +33,7 @@ then
     exit 1
 fi
 
-/bin/ls -1 $OPT_PKG_DIR/*.pkg 2>/dev/null | sed -e 's/[.]pkg$//'
+# While it might be nice to just list package names, opt-install takes
+# .pkg files, not package names, and it's good if the output is something
+# that can be passed to opt-install.
+/bin/ls -1 $OPT_PKG_DIR/*.pkg 2>/dev/null

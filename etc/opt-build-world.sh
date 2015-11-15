@@ -44,6 +44,7 @@ do
 	    pkg_name="$line"
 	    # The next package may need this one, so tell opt-build to
 	    # install it.
+	    # TODO: Install into a staging sysroot.
 	    opt-build --install from-scratch $OPT_SPECS_DIR/${pkg_name}.spec
 	    ;;
     esac

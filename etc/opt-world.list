@@ -12,7 +12,7 @@ gcc-4.9.3
 
 # This is a pseudo-package that provides CC_FOR_BUILD when building
 # natively.
-native-tools-0.1
+native-tools-0.2
 
 # We could switch over to the new gcc at this point if building natively,
 # but for simplicity we stick with the current gcc.

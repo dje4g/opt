@@ -7,6 +7,8 @@ source $OPT_ROOT/etc/opt/opt-config.sh
 IFS="
 "
 
+WORLD_LIST=$OPT_ROOT/src/opt-world.list
+
 # First pass, catch errors in the file.
 
 while read line
@@ -25,7 +27,7 @@ do
 	    fi
 	    ;;
     esac
-done < $OPT_ETC_DIR/opt-world.list
+done < $WORLD_LIST
 
 # On with the show.
 
@@ -48,6 +50,6 @@ do
 	    opt-build --install from-scratch $OPT_SPECS_DIR/${pkg_name}.spec
 	    ;;
     esac
-done < $OPT_ETC_DIR/opt-world.list
+done < $WORLD_LIST
 
 date

@@ -30,9 +30,8 @@ BINFILES = \
 ETCFILES = \
 	opt-apply-patches.sh \
 	opt-build-world.sh \
-	opt-config.sh\
-	opt-make-root-tarballs.sh\
-	opt-world.list \
+	opt-config.sh \
+	opt-make-root-tarballs.sh
 
 VARFILES = \
 	README

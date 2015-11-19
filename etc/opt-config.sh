@@ -1,6 +1,6 @@
 # Define various environment variables that configure "opt".
 
-OPT_VERSION="0.3"
+OPT_VERSION="0.3.50"
 
 # The root of the opt tree.
 # OPT_ROOT is either auto-determined or set by the user, and then compared
@@ -70,5 +70,5 @@ declare -r OPT_PARALLELISM=8
 declare -r OPT_URL_GNU=ftp://ftp.gnu.org/gnu
 
 opt_print_version() {
-    echo "OPT version $OPT_VERSION."
+    echo "OPT version $OPT_VERSION"
 }

@@ -25,6 +25,7 @@ BINFILES = \
 	opt-install \
 	opt-list-available \
 	opt-list-installed \
+	opt-list-package \
 	opt-uninstall
 
 ETCFILES = \

@@ -62,11 +62,10 @@ echo "Collision(s) detected ..."
 
 uniq --repeated "$sorted_all_files" > "$all_collisions"
 
-# We leave directories in contents files, so first remove those,
-# they aren't real collisions
-
 for f in $(cat $all_collisions)
 do
+    # We leave directories in contents files, so first remove those,
+    # they aren't real collisions
     if [ -d "$OPT_ROOT/$f" ]
     then
 	continue

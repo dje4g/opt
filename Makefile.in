@@ -33,6 +33,7 @@ ETCFILES = \
 	opt-apply-patches.sh \
 	opt-build-world.sh \
 	opt-config.sh \
+	opt-find-collisions.sh \
 	opt-make-root-tarballs.sh
 
 VARFILES = \

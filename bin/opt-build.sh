@@ -343,6 +343,8 @@ run_make() {
 
 build_contents_file() {
     mkdir -m 0755 -p "${OPTPKG_DESTDIR}${OPT_DB_DIR}"
+    # IWBN to exclude directories from the list to simplify collision
+    # detection but that would remove empty directories.
     (cd ${OPTPKG_DESTDIR}${OPT_ROOT} && find . -print) > ${OPTPKG_DESTDIR}${OPT_DB_DIR}/${OPTPKG_FULLNAME}.contents
 }
 

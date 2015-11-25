@@ -75,7 +75,7 @@ install:
 	  $(INSTALL) -m 0644 $(srcdir)/doc/$$f $(DESTDIR)$(docdir)/$$f ; \
 	done
 
-package:
+tarball:
 	set -eu ; \
 	tmp=$$(mktemp -d) ; \
 	version=$$(grep "^OPT_VERSION" $(srcdir)/etc/opt-config.sh | sed -e 's/^[^"]*"//' -e 's/"[^"]*$$//') ; \

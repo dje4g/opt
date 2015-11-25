@@ -54,5 +54,10 @@ esac
 set -x
 
 mkdir -m 0755 -p $(dirname $full_debug_file)
+
+# Some files get installed without user write permissions.
+# It doesn't buy us anything so keep it simple.
+chmod u+w "$full_elf_file"
+
 ${OPT_HOST_SYSTEM}-objcopy --only-keep-debug "$full_elf_file" "$full_debug_file"
 ${OPT_HOST_SYSTEM}-objcopy --add-gnu-debuglink="$full_debug_file" "$full_elf_file"

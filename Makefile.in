@@ -75,6 +75,20 @@ install:
 	  $(INSTALL) -m 0644 $(srcdir)/doc/$$f $(DESTDIR)$(docdir)/$$f ; \
 	done
 
+package:
+	set -eu ; \
+	tmp=$$(mktemp -d) ; \
+	version=$$(grep "^OPT_VERSION" $(srcdir)/etc/opt-config.sh | sed -e 's/^[^"]*"//' -e 's/"[^"]*$$//') ; \
+	pkgdir=$$tmp/opt-$$version ; \
+	echo "Creating release $$version package in $$tmp ..." ; \
+	mkdir -p $$pkgdir ; \
+	cp -a $(srcdir)/* $$pkgdir ; \
+	find $$pkgdir -name '*~' | xargs rm ; \
+	rm -rf $$pkgdir/autom4te.cache ; \
+	tarball=$$tmp/opt-$${version}.tar.gz ; \
+	tar -C $$tmp -z -cf $$tarball opt-$$version ; \
+	echo "Tarball $$tarball created."
+
 Makefile: Makefile.in config.status
 	CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS= \

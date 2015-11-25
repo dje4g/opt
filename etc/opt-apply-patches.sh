@@ -40,7 +40,7 @@ do
     case "$line" in
 	\#*)
 	    ;;
-	replace:*)
+	copy:* | replace:*)
 	    old_IFS="$IFS"
 	    IFS=" "
 	    set $(echo $line | sed -e s'/:/ /g')
@@ -52,11 +52,15 @@ do
 		echo "Bad patch entry, no such src file: \"$line\"" >&2
 		exit 1
 	    fi
-	    if [ ! -f "$dest_file" ]
-	    then
-		echo "Bad patch entry, no such dest file: \"$line\"" >&2
-		exit 1
-	    fi
+	    case "$line" in
+		replace:*)
+		    if [ ! -f "$dest_file" ]
+		    then
+			echo "Bad patch entry, no such dest file: \"$line\"" >&2
+			exit 1
+		    fi
+		    ;;
+	    esac
 	    ;;
 	patch:*)
 	    old_IFS="$IFS"
@@ -87,7 +91,7 @@ while read line
 do
     case "$line" in
 	\#*) ;;
-	replace:*)
+	copy:* | replace:*)
 	    old_IFS="$IFS"
 	    IFS=" "
 	    set $(echo $line | sed -e s'/:/ /g')

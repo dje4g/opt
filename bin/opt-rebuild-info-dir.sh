@@ -16,7 +16,7 @@ usage() {
 
 if [ $# -eq 1 ]
 then
-	case "$1" in
+    case "$1" in
 	--help)
 	    usage
 	    exit 0
@@ -29,7 +29,7 @@ then
 	    usage >&2
 	    exit 1
 	    ;;
-	esac
+    esac
 fi
 
 if [ $# -ne 0 ]

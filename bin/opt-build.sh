@@ -406,24 +406,31 @@ build_debug_contents_file() {
 }
 
 stage_debug_package() {
-    declare -r debug_pkg_file=$1
     rm -rf $OPTPKG_DEBUG_DESTDIR
     mkdir -m 0755 -p ${OPTPKG_DEBUG_DESTDIR}${OPT_DEBUG_DIR}${OPT_ROOT}
     # Create an image of the installed tree with debug files only,
     # living in the expected location. And then strip everything in the
     # original tree.
+    binaries=$(mktemp)
     cd ${OPTPKG_DESTDIR}${OPT_ROOT}
-    /bin/sh $OPT_ETC_DIR/opt-find-strippable-binaries.sh . \
+    /bin/sh $OPT_ETC_DIR/opt-find-strippable-binaries.sh . > $binaries
+    if [ ! -s $binaries ]
+    then
+	rm -f $binaries
+	return
+    fi
+    cat $binaries \
     | while read f
     do
 	/bin/sh $OPT_ETC_DIR/opt-split-debug.sh . "$f" ${OPTPKG_DEBUG_DESTDIR}${OPT_DEBUG_DIR}${OPT_ROOT}
     done
-    /bin/sh $OPT_ETC_DIR/opt-find-strippable-binaries.sh . \
+    cat $binaries \
     | while read f
     do
 	${OPT_HOST_SYSTEM}-strip -g "$f"
     done
     build_debug_contents_file
+    rm -f $binaries
 }
 
 finish_package() {
@@ -434,12 +441,15 @@ finish_package() {
 	declare -r pkg_file=${OPTSTAGE_PKG_DIR}/${OPTPKG_FULLNAME}.pkg
 	declare -r debug_pkg_file=${OPTSTAGE_PKG_DIR}/${OPTPKG_FULLNAME}.dpkg
 	rm -f $pkg_file $debug_pkg_file
-	stage_debug_package $debug_pkg_file
+	stage_debug_package
 	# Prepend a leading unique directory so that trying to install in /
 	# will break. It *could* work, but it doesn't feel safe to allow this
 	# by default. The user can always pass --strip-components=1 to tar.
 	tar -C ${OPTPKG_DESTDIR}${OPT_ROOT} --transform="s,^[.]/,opt/," -z -cf $pkg_file .
-	tar -C ${OPTPKG_DEBUG_DESTDIR}${OPT_ROOT} --transform="s,^[.]/,opt/," -z -cf $debug_pkg_file .
+	if [ -d ${OPTPKG_DEBUG_DESTDIR}${OPT_DB_DIR}/dpkg ]
+	then
+	    tar -C ${OPTPKG_DEBUG_DESTDIR}${OPT_ROOT} --transform="s,^[.]/,opt/," -z -cf $debug_pkg_file .
+	fi
 	if [ $do_install = yes ]
 	then
 	    opt-install $pkg_file

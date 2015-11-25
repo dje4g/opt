@@ -18,7 +18,8 @@ usage() {
     echo "Mode is one of:"
     echo "  help"
     # TODO(dje): It might be useful to split up prepare into prepare, extract.
-    echo "  prepare"
+    # "source" is a synonym for "prepare": for installing the "source" package
+    echo "  prepare [or source]"
     echo "  configure"
     echo "  make"
     echo "  stage"
@@ -80,7 +81,7 @@ case "$mode" in
 	usage
 	exit 0
 	;;
-    prepare | configure | make | stage | sysroot | package | clean)
+    prepare | source | configure | make | stage | sysroot | package | clean)
 	;;
     from-scratch | from-source)
 	;;
@@ -101,6 +102,7 @@ rqst_clean=no
 
 case "$mode" in
     prepare) rqst_prepare=yes ;;
+    source) rqst_prepare=yes ;;
     configure) rqst_configure=yes ;;
     make) rqst_make=yes ;;
     stage) rqst_stage=yes ;;
@@ -230,18 +232,6 @@ analyze_spec() {
     set +x
 }
 
-build_source_package() {
-    declare -r source_pkg_file=${OPTSTAGE_PKG_DIR}/${OPTPKG_FULLNAME}.spkg
-    rm -f $source_pkg_file
-    # Prepend a leading unique directory so that trying to install in /
-    # will break. It *could* work, but it doesn't feel safe to allow this
-    # by default. The user can always pass --strip-components=1 to tar.
-    # TODO(dje): The sources will get installed in the staging area, we
-    # should install them elsewhere, but there's currently no need.
-    tar -C $OPT_ROOT --transform="s,^[.]/,opt/," -z -cf $source_pkg_file ./staging/src/$OPTPKG_FULLNAME
-    # There's no need for a "contents" file, it's easy enough to just rm -rf.
-}
-
 prepare_package() {
     if [ "$rqst_prepare" = yes ]
     then
@@ -254,11 +244,6 @@ prepare_package() {
 	then
 	    /bin/sh $OPT_ROOT/etc/opt/opt-apply-patches.sh $OPT_PATCHES_DIR/$PKG_PATCHES $OPTPKG_SRCDIR/$PKG_SRC
 	fi
-	# Create the source package now, before the build, in case we're
-	# building in the source tree.
-	# TODO(dje): This means we won't get machine-generated source files,
-	# but the extra complexity to handle that isn't worth it yet.
-	build_source_package
 	set +x
     fi
 }

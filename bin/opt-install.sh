@@ -12,7 +12,7 @@ source $OPT_ROOT/etc/opt/opt-config.sh
 usage() {
     echo "Usage: opt-install <pkg>"
     echo "       opt-install --help|--version"
-    echo "<pkg> must be an opt package file: foo.pkg, foo.dpkg or foo.spkg."
+    echo "<pkg> must be an opt package file: foo.pkg or foo.dpkg."
 }
 
 if [ $# -ne 1 ]
@@ -37,7 +37,6 @@ opt_file="$1"
 case "$opt_file" in
     *.pkg) declare -r kind=pkg ;;
     *.dpkg) declare -r kind=dpkg ;;
-    *.spkg) declare -r kind=spkg ;;
     *)
 	echo "Not an opt package: $opt_file" >&2
 	exit 1
@@ -54,11 +53,8 @@ set +x
 
 # Final sanity check.
 
-if [ $kind != spkg ]
+pkg_name=$(basename ${opt_file} .$kind)
+if [ ! -f "$OPT_DB_DIR/$kind/${pkg_name}.contents" ]
 then
-    pkg_name=$(basename ${opt_file} .$kind)
-    if [ ! -f "$OPT_DB_DIR/$kind/${pkg_name}.contents" ]
-    then
-	echo "WARNING: Missing contents file from package." >&2
-    fi
+    echo "WARNING: Missing contents file from package." >&2
 fi

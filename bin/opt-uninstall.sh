@@ -12,7 +12,7 @@ source $OPT_ROOT/etc/opt/opt-config.sh
 usage() {
     echo "Usage: opt-uninstall [--debug] <pkg-name>"
     echo "       opt-uninstall --help|--version"
-    echo "Note: To uninstall a source package, just rm -rf the source tree."
+    echo "Note: To uninstall sources, just rm -rf the source tree."
 }
 
 if [ $# -eq 0 -o $# -gt 2 ]

@@ -34,7 +34,9 @@ ETCFILES = \
 	opt-build-world.sh \
 	opt-config.sh \
 	opt-find-collisions.sh \
-	opt-make-root-tarballs.sh
+	opt-find-strippable-binaries.sh \
+	opt-make-root-tarballs.sh \
+	opt-split-debug.sh
 
 VARFILES = \
 	README

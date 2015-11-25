@@ -50,6 +50,9 @@ declare -r OPT_PKG_DIR=$OPT_ROOT/packages
 # Where we record details of packages.
 declare -r OPT_DB_DIR=$OPT_ROOT/var/opt
 
+# Where debug packages get installed. GDB knows to look here.
+declare -r OPT_DEBUG_DIR=$OPT_ROOT/lib/debug
+
 # The build/host/target triplets.
 # For non-crosstools host == target.
 # For crosstools host == build, target != host.

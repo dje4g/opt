@@ -220,12 +220,26 @@ analyze_spec() {
     declare -g -r OPTPKG_SRCDIR=$OPT_STAGE_DIR/src/$OPTPKG_FULLNAME
     declare -g -r OPTPKG_BUILDDIR=$OPT_STAGE_DIR/build/$OPTPKG_FULLNAME
     declare -g -r OPTPKG_DESTDIR=$OPT_STAGE_DIR/destdir/$OPTPKG_FULLNAME
+    declare -g -r OPTPKG_DEBUG_DESTDIR=$OPT_STAGE_DIR/debug-destdir/$OPTPKG_FULLNAME
     export OPTPKG_FULLNAME
     export OPTPKG_SRCDIR
     export OPTPKG_BUILDDIR
     export OPTPKG_DESTDIR
+    export OPTPKG_DEBUG_DESTDIR
 
     set +x
+}
+
+build_source_package() {
+    declare -r source_pkg_file=${OPTSTAGE_PKG_DIR}/${OPTPKG_FULLNAME}.spkg
+    rm -f $source_pkg_file
+    # Prepend a leading unique directory so that trying to install in /
+    # will break. It *could* work, but it doesn't feel safe to allow this
+    # by default. The user can always pass --strip-components=1 to tar.
+    # TODO(dje): The sources will get installed in the staging area, we
+    # should install them elsewhere, but there's currently no need.
+    tar -C $OPT_ROOT --transform="s,^[.]/,opt/," -z -cf $source_pkg_file ./staging/src/$OPTPKG_FULLNAME
+    # There's no need for a "contents" file, it's easy enough to just rm -rf.
 }
 
 prepare_package() {
@@ -240,6 +254,11 @@ prepare_package() {
 	then
 	    /bin/sh $OPT_ROOT/etc/opt/opt-apply-patches.sh $OPT_PATCHES_DIR/$PKG_PATCHES $OPTPKG_SRCDIR/$PKG_SRC
 	fi
+	# Create the source package now, before the build, in case we're
+	# building in the source tree.
+	# TODO(dje): This means we won't get machine-generated source files,
+	# but the extra complexity to handle that isn't worth it yet.
+	build_source_package
 	set +x
     fi
 }
@@ -268,7 +287,7 @@ std_cross_configure() {
 	$OPTPKG_BUILD_SYSROOT_OPTION \
 	--disable-nls \
 	--enable-shared \
-	CFLAGS=-O2 CXXFLAGS=-O2 \
+	CFLAGS="-g -O2" CXXFLAGS="-g -O2" \
 	"$@"
 }
 
@@ -283,7 +302,7 @@ std_native_configure() {
 	--prefix=$OPT_ROOT \
 	--disable-nls \
 	--enable-shared \
-	CFLAGS=-O2 CXXFLAGS=-O2 \
+	CFLAGS="-g -O2" CXXFLAGS="-g -O2" \
 	"$@"
 }
 
@@ -318,8 +337,8 @@ run_configure() {
 
 std_make() {
     make -j$OPT_PARALLELISM \
-	 CFLAGS=-O2 CXXFLAGS=-O2 \
-	 "$@"
+	CFLAGS="-g -O2" CXXFLAGS="-g -O2" \
+	"$@"
 }
 
 pkg_make() {
@@ -342,10 +361,10 @@ run_make() {
 }
 
 build_contents_file() {
-    mkdir -m 0755 -p "${OPTPKG_DESTDIR}${OPT_DB_DIR}"
+    mkdir -m 0755 -p ${OPTPKG_DESTDIR}${OPT_DB_DIR}/pkg
     # IWBN to exclude directories from the list to simplify collision
     # detection but that would remove empty directories.
-    (cd ${OPTPKG_DESTDIR}${OPT_ROOT} && find . -print) > ${OPTPKG_DESTDIR}${OPT_DB_DIR}/${OPTPKG_FULLNAME}.contents
+    (cd ${OPTPKG_DESTDIR}${OPT_ROOT} && find . -print) > ${OPTPKG_DESTDIR}${OPT_DB_DIR}/pkg/${OPTPKG_FULLNAME}.contents
 }
 
 std_stage() {
@@ -394,18 +413,48 @@ run_stage() {
     fi
 }
 
+build_debug_contents_file() {
+    mkdir -m 0755 -p ${OPTPKG_DEBUG_DESTDIR}${OPT_DB_DIR}/dpkg
+    # IWBN to exclude directories from the list to simplify collision
+    # detection but that would remove empty directories.
+    (cd ${OPTPKG_DEBUG_DESTDIR}${OPT_ROOT} && find . -print) > ${OPTPKG_DEBUG_DESTDIR}${OPT_DB_DIR}/dpkg/${OPTPKG_FULLNAME}.contents
+}
+
+stage_debug_package() {
+    declare -r debug_pkg_file=$1
+    rm -rf $OPTPKG_DEBUG_DESTDIR
+    mkdir -m 0755 -p ${OPTPKG_DEBUG_DESTDIR}${OPT_DEBUG_DIR}${OPT_ROOT}
+    # Create an image of the installed tree with debug files only,
+    # living in the expected location. And then strip everything in the
+    # original tree.
+    cd ${OPTPKG_DESTDIR}${OPT_ROOT}
+    /bin/sh $OPT_ETC_DIR/opt-find-strippable-binaries.sh . \
+    | while read f
+    do
+	/bin/sh $OPT_ETC_DIR/opt-split-debug.sh . "$f" ${OPTPKG_DEBUG_DESTDIR}${OPT_DEBUG_DIR}${OPT_ROOT}
+    done
+    /bin/sh $OPT_ETC_DIR/opt-find-strippable-binaries.sh . \
+    | while read f
+    do
+	${OPT_HOST_SYSTEM}-strip -g "$f"
+    done
+    build_debug_contents_file
+}
+
 finish_package() {
     if [ "$rqst_package" = yes ]
     then
 	set -x
-	cd ${OPTPKG_DESTDIR}${OPT_ROOT}
 	mkdir -m 0755 -p $OPTSTAGE_PKG_DIR
-	pkg_file=${OPTSTAGE_PKG_DIR}/${OPTPKG_FULLNAME}.pkg
-	rm -f $pkg_file
+	declare -r pkg_file=${OPTSTAGE_PKG_DIR}/${OPTPKG_FULLNAME}.pkg
+	declare -r debug_pkg_file=${OPTSTAGE_PKG_DIR}/${OPTPKG_FULLNAME}.dpkg
+	rm -f $pkg_file $debug_pkg_file
+	stage_debug_package $debug_pkg_file
 	# Prepend a leading unique directory so that trying to install in /
 	# will break. It *could* work, but it doesn't feel safe to allow this
 	# by default. The user can always pass --strip-components=1 to tar.
-	tar --transform="s,^[.]/,opt/," -z -cf $pkg_file .
+	tar -C ${OPTPKG_DESTDIR}${OPT_ROOT} --transform="s,^[.]/,opt/," -z -cf $pkg_file .
+	tar -C ${OPTPKG_DEBUG_DESTDIR}${OPT_ROOT} --transform="s,^[.]/,opt/," -z -cf $debug_pkg_file .
 	if [ $do_install = yes ]
 	then
 	    opt-install $pkg_file
@@ -420,12 +469,13 @@ finish_package() {
 	rm -rf $OPTPKG_SRCDIR
 	rm -rf $OPTPKG_BUILDDIR
 	rm -rf $OPTPKG_DESTDIR
+	rm -rf $OPTPKG_DEBUG_DESTDIR
 	set +x
     fi
 }
 
 std_package() {
-    # After sourcing opt-build.sh, all non-std scripts begin with this.
+    # All builds begin with this.
     prepare_package
 
     run_configure

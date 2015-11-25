@@ -10,15 +10,18 @@ esac
 source $OPT_ROOT/etc/opt/opt-config.sh
 
 usage() {
-    echo "Usage: opt-uninstall <pkg-name>"
-    echo "       opt-uninstall --help"
+    echo "Usage: opt-uninstall [--debug] <pkg-name>"
+    echo "       opt-uninstall --help|--version"
+    echo "Note: To uninstall a source package, just rm -rf the source tree."
 }
 
-if [ $# -ne 1 ]
+if [ $# -eq 0 -o $# -gt 2 ]
 then
     usage >&2
     exit 1
 fi
+
+kind=pkg
 
 case "$1" in
     --help)
@@ -29,15 +32,25 @@ case "$1" in
 	opt_print_version
 	exit 0
 	;;
+    --debug)
+	kind=dpkg
+	shift
+	;;
 esac
+
+if [ $# -ne 1 ]
+then
+    usage >&2
+    exit 1
+fi
 
 pkg_name="$1"
 
-pkg_contents_file="$OPT_DB_DIR/${pkg_name}.contents"
+pkg_contents_file="$OPT_DB_DIR/$kind/${pkg_name}.contents"
 
 if [ ! -f "$pkg_contents_file" ]
 then
-    echo "Either package is not installed or not a package." >&2
+    echo "Either package is not installed or is not a package." >&2
     exit 1
 fi
 
@@ -50,5 +63,3 @@ cat "$pkg_contents_file" | \
     do
 	[ -f "$f" ] && rm -f -- "$f"
     done
-
-# TODO(dje): Remove directories that are now empty.

@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # List files in a package.
 
 set -eu

@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Make tarballs of packages in the root image.
 
 set -eu

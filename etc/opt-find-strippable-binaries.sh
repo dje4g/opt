@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Usage: opt-find-strippable-binaries.sh <dir>
 
 set -eu

@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # List all installed packages.
 
 set -eu

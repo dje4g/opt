@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Install an opt package.
 
 set -eu

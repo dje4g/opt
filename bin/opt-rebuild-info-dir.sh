@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Rebuild the info directory (table of contents).
 
 set -eu

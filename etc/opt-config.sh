@@ -1,6 +1,6 @@
 # Define various environment variables that configure "opt".
 
-OPT_VERSION="0.4"
+OPT_VERSION="0.5"
 
 # The root of the opt tree.
 # OPT_ROOT is either auto-determined or set by the user, and then compared

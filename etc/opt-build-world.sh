@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Utility script to build the entire world.
 
 set -eu

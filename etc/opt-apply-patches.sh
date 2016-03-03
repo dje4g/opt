@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Usage: opt-apply-patches.sh <patch-spec-file> <src-dir>
 
 set -eu
@@ -122,7 +122,7 @@ do
 		command="$@"
 		set -eux
 		cd $OPTPKG_SRCDIR/$PKG_SRC
-		/bin/sh -c "$command"
+		/bin/bash -c "$command"
 	    ) || exit 1
 	    ;;
 	"" | \ *)

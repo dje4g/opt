@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Main script for building packages.
 #
 # Functions beginning with pkg_ are for packages to redefine if needed.
@@ -242,7 +242,7 @@ prepare_package() {
 	tar -C $OPTPKG_SRCDIR -xf $OPT_SRC_DIR/$PKG_TARBALL
 	if [ "$PKG_PATCHES" != "none" ]
 	then
-	    /bin/sh $OPT_ROOT/etc/opt/opt-apply-patches.sh $OPT_PATCHES_DIR/$PKG_PATCHES $OPTPKG_SRCDIR/$PKG_SRC
+	    /bin/bash $OPT_ROOT/etc/opt/opt-apply-patches.sh $OPT_PATCHES_DIR/$PKG_PATCHES $OPTPKG_SRCDIR/$PKG_SRC
 	fi
 	set +x
     fi
@@ -413,7 +413,7 @@ stage_debug_package() {
     # original tree.
     binaries=$(mktemp)
     cd ${OPTPKG_DESTDIR}${OPT_ROOT}
-    /bin/sh $OPT_ETC_DIR/opt-find-strippable-binaries.sh . > $binaries
+    /bin/bash $OPT_ETC_DIR/opt-find-strippable-binaries.sh . > $binaries
     if [ ! -s $binaries ]
     then
 	rm -f $binaries
@@ -422,7 +422,7 @@ stage_debug_package() {
     cat $binaries \
     | while read f
     do
-	/bin/sh $OPT_ETC_DIR/opt-split-debug.sh . "$f" ${OPTPKG_DEBUG_DESTDIR}${OPT_DEBUG_DIR}${OPT_ROOT}
+	/bin/bash $OPT_ETC_DIR/opt-split-debug.sh . "$f" ${OPTPKG_DEBUG_DESTDIR}${OPT_DEBUG_DIR}${OPT_ROOT}
     done
     cat $binaries \
     | while read f

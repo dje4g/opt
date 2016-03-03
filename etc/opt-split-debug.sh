@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Usage: opt-split-debug.sh <elf-file> <debug-file-dir>
 
 set -eu

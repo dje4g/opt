@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # List all available packages contained in $OPT_ROOT/packages.
 
 set -eu

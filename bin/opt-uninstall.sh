@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Uninstall an opt package.
 
 set -eu
